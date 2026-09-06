@@ -17,7 +17,7 @@ const registerRules = [
     .isLength({ min: 6 }).withMessage('كلمة السر يجب أن تكون 6 أحرف على الأقل'),
 
   body('sex')
-    .isIn(['MALE', 'FEMALE']).withMessage('الجنس يجب أن يكون MALE أو FEMALE')
+    .isIn(['homme', 'femme']).withMessage('الجنس يجب أن يكون homme أو femme')
 ];
 
 module.exports = {
