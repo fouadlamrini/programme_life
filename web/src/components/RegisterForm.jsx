@@ -39,7 +39,7 @@ function RegisterForm({ onSubmit, isSubmitting }) {
     <form className="mt-8 space-y-5" onSubmit={handleSubmit}>
       <div className="grid gap-5 sm:grid-cols-2">
         <label className="block">
-            <span className="mb-2 block text-sm font-medium text-[#40584b]">الاسم الأول</span>
+          <span className="mb-2 block text-sm font-medium text-[#40584b]">الاسم الأول</span>
           <input
             className="w-full rounded-xl border border-[#dfd2b7] bg-white px-4 py-3 text-[#123d32] outline-none transition placeholder:text-[#9aa496] focus:border-[#c38a24] focus:ring-4 focus:ring-[#f7e4b4]"
             name="firstName"
@@ -52,7 +52,7 @@ function RegisterForm({ onSubmit, isSubmitting }) {
         </label>
 
         <label className="block">
-            <span className="mb-2 block text-sm font-medium text-[#40584b]">اسم العائلة</span>
+          <span className="mb-2 block text-sm font-medium text-[#40584b]">اسم العائلة</span>
           <input
             className="w-full rounded-xl border border-[#dfd2b7] bg-white px-4 py-3 text-[#123d32] outline-none transition placeholder:text-[#9aa496] focus:border-[#c38a24] focus:ring-4 focus:ring-[#f7e4b4]"
             name="lastName"
@@ -96,7 +96,9 @@ function RegisterForm({ onSubmit, isSubmitting }) {
         <label className="block">
           <span className="mb-2 block text-sm font-medium text-[#40584b]">تأكيد كلمة المرور</span>
           <input
-            className={`w-full rounded-xl border bg-white px-4 py-3 text-[#123d32] outline-none transition placeholder:text-[#9aa496] focus:ring-4 focus:ring-[#f7e4b4] ${passwordError ? 'border-[#b94b32]' : 'border-[#dfd2b7] focus:border-[#c38a24]'}`}
+            className={`w-full rounded-xl border bg-white px-4 py-3 text-[#123d32] outline-none transition placeholder:text-[#9aa496] focus:ring-4 focus:ring-[#f7e4b4] ${
+              passwordError ? 'border-[#b94b32]' : 'border-[#dfd2b7] focus:border-[#c38a24]'
+            }`}
             minLength={6}
             name="confirmPassword"
             onChange={handleChange}
@@ -117,7 +119,9 @@ function RegisterForm({ onSubmit, isSubmitting }) {
             required
             value={form.sex}
           >
-            <option disabled value="">اختر الجنس</option>
+            <option disabled value="">
+              اختر الجنس
+            </option>
             <option value="homme">ذكر</option>
             <option value="femme">أنثى</option>
           </select>

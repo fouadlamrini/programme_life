@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import RegisterForm from '../components/RegisterForm'
-
-const registerUrl = `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/auth/register`
+import { registerApi } from '../services/authService'
 
 function Register() {
   const [status, setStatus] = useState({ type: '', message: '' })
@@ -12,21 +11,13 @@ function Register() {
     setIsSubmitting(true)
 
     try {
-      const response = await fetch(registerUrl, {
-        body: JSON.stringify(formData),
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        method: 'POST',
-      })
-      const data = await response.json()
+      const data = await registerApi(formData)
 
-      if (!response.ok) {
-        const validationMessage = data.errors?.map((error) => error.msg).join(', ')
-        throw new Error(validationMessage || data.message || 'تعذر إنشاء الحساب.')
-      }
-
+      // حفظ Access Token فـ LocalStorage
       localStorage.setItem('accessToken', data.accessToken)
       setStatus({ type: 'success', message: data.message || 'تم إنشاء الحساب بنجاح.' })
+      
+      // تقدر تزيد هنا التوجيه لصفحة الـ Dashboard مستقبلاً
     } catch (error) {
       setStatus({
         type: 'error',
@@ -68,7 +59,9 @@ function Register() {
 
           {status.message && (
             <div
-              className={`mt-6 rounded-xl px-4 py-3 text-sm ${status.type === 'success' ? 'bg-[#e0f0e3] text-[#236247]' : 'bg-[#fbe5dc] text-[#a44e20]'}`}
+              className={`mt-6 rounded-xl px-4 py-3 text-sm ${
+                status.type === 'success' ? 'bg-[#e0f0e3] text-[#236247]' : 'bg-[#fbe5dc] text-[#a44e20]'
+              }`}
               role="alert"
             >
               {status.message}
