@@ -11,7 +11,7 @@ const registerRules = [
 
   body('email')
     .isEmail().withMessage('البريد الإلكتروني غير صحيح')
-    .normalizeEmail(),
+    .normalizeEmail({ gmail_remove_dots: false }),
 
   body('password')
     .isLength({ min: 6 }).withMessage('كلمة السر يجب أن تكون 6 أحرف على الأقل'),
