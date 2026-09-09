@@ -3,6 +3,71 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 // ==========================================
+// LOGIN CONTROLLER
+// ==========================================
+const login = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // 1. Find user by email (جلب كلمة السر مع المستخدم)
+    const user = await User.findOne({ email }).select('+password');
+    if (!user) {
+      return res.status(400).json({ message: 'البريد الإلكتروني أو كلمة السر غير صحيحة' });
+    }
+
+    // 2. Compare password
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: 'البريد الإلكتروني أو كلمة السر غير صحيحة' });
+    }
+
+    // 3. Direct JWT Sign using environment variables
+    const accessToken = jwt.sign(
+      { userId: user._id },
+      process.env.ACCESS_TOKEN_SECRET,
+      { expiresIn: process.env.ACCESS_TOKEN_EXPIRES_IN }
+    );
+
+    const refreshToken = jwt.sign(
+      { userId: user._id },
+      process.env.REFRESH_TOKEN_SECRET,
+      { expiresIn: process.env.REFRESH_TOKEN_EXPIRES_IN }
+    );
+
+    // 4. Save Refresh Token in DB
+    user.refreshToken = refreshToken;
+    await user.save();
+
+    // 5. Set Refresh Token in Cookie (Configured for Local Development)
+    const isProduction = process.env.NODE_ENV === 'production';
+
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: isProduction, // false f development باش يخدم بـ HTTP العادي
+      sameSite: isProduction ? 'strict' : 'lax', // lax f development باش يتقبل بين Ports مختلفين
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+    });
+
+    // 6. Send Response
+    return res.status(200).json({
+      message: 'تم تسجيل الدخول بنجاح',
+      accessToken,
+      user: {
+        id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        sex: user.sex,
+        isPeriodMode: user.isPeriodMode
+      }
+    });
+
+  } catch (error) {
+    return res.status(500).json({ message: 'حدث خطأ في السيرفر', error: error.message });
+  }
+};
+
+// ==========================================
 // REGISTER CONTROLLER 
 // ==========================================
 const register = async (req, res) => {
@@ -79,5 +144,6 @@ const register = async (req, res) => {
 };
 
 module.exports = {
-  register
+  register,
+  login
 };
