@@ -1,24 +1,12 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 
 function ProfileForm({ user, onSubmit, isSubmitting }) {
   const [form, setForm] = useState({
-    firstName: '',
-    lastName: '',
-    city: '',
-    country: '',
+    firstName: user?.firstName || '',
+    lastName: user?.lastName || '',
+    city: user?.city || '',
+    country: user?.country || '',
   })
-
-  // عند تحميل بيانات المستخدم، نفّيها بالحقول
-  useEffect(() => {
-    if (user) {
-      setForm({
-        firstName: user.firstName || '',
-        lastName: user.lastName || '',
-        city: user.city || '',
-        country: user.country || '',
-      })
-    }
-  }, [user])
 
   const handleChange = (event) => {
     const { name, value } = event.target

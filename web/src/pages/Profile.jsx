@@ -120,7 +120,7 @@ function Profile() {
               </div>
             )}
 
-            <ProfileForm isSubmitting={isSavingProfile} onSubmit={handleUpdateProfile} user={user} />
+            <ProfileForm isSubmitting={isSavingProfile} key={user?.id} onSubmit={handleUpdateProfile} user={user} />
           </section>
 
           {/* قسم تغيير كلمة المرور */}
