@@ -22,9 +22,9 @@ function Dashboard() {
           <div className="flex items-center gap-3">
             <Link
               className="rounded-xl border border-[#dfd2b7] bg-[#fffdf7] px-5 py-2.5 font-semibold text-[#174d3d] transition hover:bg-[#f7e4b4]"
-              to="/profile"
+              to="/settings"
             >
-              ملفي الشخصي
+              الإعدادات
             </Link>
             <button
               className="rounded-xl bg-[#174d3d] px-5 py-2.5 font-semibold text-[#fffdf7] transition hover:bg-[#b8731b] focus:outline-none focus:ring-4 focus:ring-[#f7e4b4]"
