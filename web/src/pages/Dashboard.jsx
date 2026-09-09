@@ -59,8 +59,6 @@ function Dashboard() {
   }, [navigate])
 
   const fetchActivities = useCallback(async () => {
-    setLoading(true)
-    setError('')
     try {
       const data = await getActivitiesApi()
       setActivities(data.activities || [])
@@ -76,8 +74,27 @@ function Dashboard() {
   }, [handleLogout])
 
   useEffect(() => {
-    fetchActivities()
-  }, [fetchActivities])
+    let cancelled = false
+    getActivitiesApi()
+      .then((data) => {
+        if (!cancelled) setActivities(data.activities || [])
+      })
+      .catch((err) => {
+        if (cancelled) return
+        if (err.cause?.response?.status === 401) {
+          handleLogout()
+          return
+        }
+        setError(err.message || 'تعذر جلب الأنشطة.')
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [handleLogout])
 
   return (
     <main dir="rtl" className="min-h-screen bg-[#f5f1e4] px-6 py-10 text-right text-[#123d32]">
@@ -121,7 +138,7 @@ function Dashboard() {
         {!loading && error && (
           <section className="rounded-3xl border border-[#f5c9b8] bg-[#fbe5dc] p-8 text-[#a44e20]" role="alert">
             <p className="font-semibold">{error}</p>
-            <button className="mt-4 rounded-xl bg-[#a44e20] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#c05f27]" onClick={fetchActivities} type="button">
+            <button className="mt-4 rounded-xl bg-[#a44e20] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#c05f27]" onClick={() => { setLoading(true); fetchActivities() }} type="button">
               إعادة المحاولة
             </button>
           </section>
