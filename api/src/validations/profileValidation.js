@@ -20,17 +20,6 @@ const updateProfileRules = [
     .optional()
     .notEmpty().withMessage('البلد لا يمكن أن يكون فارغاً')
     .trim(),
-
-  body('password')
-    .optional()
-    .isLength({ min: 6 }).withMessage('كلمة السر يجب أن تكون 6 أحرف على الأقل')
-    .custom((value, { req }) => {
-      // فقط تحقق من التطابق إذا تم إرسال confirmPassword
-      if (req.body.confirmPassword && value !== req.body.confirmPassword) {
-        throw new Error('كلمتا المرور غير متطابقتين');
-      }
-      return true;
-    }),
 ];
 
 module.exports = {
