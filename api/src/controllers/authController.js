@@ -1,6 +1,7 @@
 const User = require('../models/user');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { createDefaultActivities } = require('../services/defaultActivityService');
 
 // ==========================================
 // LOGIN CONTROLLER
@@ -112,7 +113,11 @@ const register = async (req, res) => {
     newUser.refreshToken = refreshToken;
     await newUser.save();
 
-    // 6. Set Refresh Token in Cookie (Configured for Local Development)
+    // 6. Create Default Activities (آمن ضد التكرار)
+    await createDefaultActivities(newUser._id);
+    newUser.onboardingCompleted = true;
+
+    // 7. Set Refresh Token in Cookie (Configured for Local Development)
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       secure: false, // kodo local (HTTP عادي)
@@ -120,7 +125,7 @@ const register = async (req, res) => {
       maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
     });
 
-    // 7. Send Response
+    // 8. Send Response
     return res.status(201).json({
       message: 'تم إنشاء الحساب بنجاح',
       accessToken,
@@ -130,7 +135,8 @@ const register = async (req, res) => {
         lastName: newUser.lastName,
         email: newUser.email,
         sex: newUser.sex,
-        isPeriodMode: newUser.isPeriodMode
+        isPeriodMode: newUser.isPeriodMode,
+        onboardingCompleted: newUser.onboardingCompleted
       }
     });
 
