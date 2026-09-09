@@ -11,6 +11,7 @@ const userSchema = new mongoose.Schema({
   city: { type: String, default: 'Nador' },
   
   isPeriodMode: { type: Boolean, default: false },
+  onboardingCompleted: { type: Boolean, default: false },
   refreshToken: { type: String, default: null }
 }, { timestamps: true });
 
