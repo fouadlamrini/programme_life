@@ -20,3 +20,14 @@ export const registerApi = async (formData) => {
     throw new Error(validationMessage || data?.message || 'تعذر إنشاء الحساب.', { cause: error })
   }
 }
+
+export const loginApi = async (credentials) => {
+  try {
+    const response = await api.post('/auth/login', credentials)
+    return response.data
+  } catch (error) {
+    const data = error.response?.data
+    const validationMessage = data?.errors?.map((err) => err.msg).join(', ')
+    throw new Error(validationMessage || data?.message || 'تعذر تسجيل الدخول.', { cause: error })
+  }
+}
