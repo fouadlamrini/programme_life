@@ -75,7 +75,40 @@ const updateProfile = async (req, res) => {
   }
 };
 
+// ==========================================
+// CHANGE PASSWORD CONTROLLER (تغيير كلمة السر)
+// ==========================================
+const changePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    // 1. Jib l'user m3a password (select: false f model)
+    const user = await User.findById(req.userId).select('+password');
+    if (!user) {
+      return res.status(404).json({ message: 'المستخدم غير موجود' });
+    }
+
+    // 2. Compare l'password 9dima dyal l'user (l'7adira)
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: 'كلمة المرور الحالية غير صحيحة' });
+    }
+
+    // 3. Hash w saif l'password jdida
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(newPassword, salt);
+    await user.save();
+
+    // 4. Send Response
+    return res.status(200).json({ message: 'تم تغيير كلمة المرور بنجاح' });
+
+  } catch (error) {
+    return res.status(500).json({ message: 'حدث خطأ في السيرفر', error: error.message });
+  }
+};
+
 module.exports = {
   getMe,
-  updateProfile
+  updateProfile,
+  changePassword
 };
