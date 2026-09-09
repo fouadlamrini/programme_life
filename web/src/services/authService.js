@@ -72,3 +72,13 @@ export const changePasswordApi = async (passwordData) => {
     throw new Error(validationMessage || data?.message || 'تعذر تغيير كلمة المرور.', { cause: error })
   }
 }
+
+export const getActivitiesApi = async () => {
+  try {
+    const response = await api.get('/activities')
+    return response.data
+  } catch (error) {
+    const data = error.response?.data
+    throw new Error(data?.message || 'تعذر جلب الأنشطة.', { cause: error })
+  }
+}
