@@ -39,12 +39,10 @@ const login = async (req, res) => {
     await user.save();
 
     // 5. Set Refresh Token in Cookie (Configured for Local Development)
-    const isProduction = process.env.NODE_ENV === 'production';
-
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
-      secure: isProduction, // false f development باش يخدم بـ HTTP العادي
-      sameSite: isProduction ? 'strict' : 'lax', // lax f development باش يتقبل بين Ports مختلفين
+      secure: false, // kodo local (HTTP عادي) 
+      sameSite: 'lax', // للعمل بين Ports مختلفين
       maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
     });
 
