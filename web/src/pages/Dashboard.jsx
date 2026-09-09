@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
 function Dashboard() {
   const navigate = useNavigate()
@@ -19,13 +19,21 @@ function Dashboard() {
               <h1 className="text-2xl font-semibold tracking-tight">لوحة التحكم</h1>
             </div>
           </div>
-          <button
-            className="rounded-xl bg-[#174d3d] px-5 py-2.5 font-semibold text-[#fffdf7] transition hover:bg-[#b8731b] focus:outline-none focus:ring-4 focus:ring-[#f7e4b4]"
-            onClick={handleLogout}
-            type="button"
-          >
-            تسجيل الخروج
-          </button>
+          <div className="flex items-center gap-3">
+            <Link
+              className="rounded-xl border border-[#dfd2b7] bg-[#fffdf7] px-5 py-2.5 font-semibold text-[#174d3d] transition hover:bg-[#f7e4b4]"
+              to="/profile"
+            >
+              ملفي الشخصي
+            </Link>
+            <button
+              className="rounded-xl bg-[#174d3d] px-5 py-2.5 font-semibold text-[#fffdf7] transition hover:bg-[#b8731b] focus:outline-none focus:ring-4 focus:ring-[#f7e4b4]"
+              onClick={handleLogout}
+              type="button"
+            >
+              تسجيل الخروج
+            </button>
+          </div>
         </header>
 
         <section className="rounded-3xl border border-[#dfd2b7] bg-[#fffdf7] p-8 shadow-xl shadow-[#123d32]/10">
