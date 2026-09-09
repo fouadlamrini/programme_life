@@ -38,7 +38,7 @@ const getMe = async (req, res) => {
 // ==========================================
 const updateProfile = async (req, res) => {
   try {
-    const { firstName, lastName, city, country, password } = req.body;
+    const { firstName, lastName, city, country } = req.body;
 
     // 1. Jib l'user mn DB
     const user = await User.findById(req.userId);
@@ -52,16 +52,10 @@ const updateProfile = async (req, res) => {
     if (city) user.city = city;
     if (country) user.country = country;
 
-    // 3. Ila kan password, hashitou w jbednah jdid
-    if (password) {
-      const salt = await bcrypt.genSalt(10);
-      user.password = await bcrypt.hash(password, salt);
-    }
-
-    // 4. Saif
+    // 3. Saif
     await user.save();
 
-    // 5. Send Response (bla password)
+    // 4. Send Response (bla password)
     return res.status(200).json({
       message: 'تم تحديث الملف الشخصي بنجاح',
       user: {
