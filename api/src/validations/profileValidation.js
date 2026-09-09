@@ -25,7 +25,8 @@ const updateProfileRules = [
     .optional()
     .isLength({ min: 6 }).withMessage('كلمة السر يجب أن تكون 6 أحرف على الأقل')
     .custom((value, { req }) => {
-      if (value && value !== req.body.confirmPassword) {
+      // فقط تحقق من التطابق إذا تم إرسال confirmPassword
+      if (req.body.confirmPassword && value !== req.body.confirmPassword) {
         throw new Error('كلمتا المرور غير متطابقتين');
       }
       return true;
