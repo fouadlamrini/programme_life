@@ -1,10 +1,12 @@
 import { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import RegisterForm from '../components/RegisterForm'
 import { registerApi } from '../services/authService'
 
 function Register() {
   const [status, setStatus] = useState({ type: '', message: '' })
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const navigate = useNavigate()
 
   const handleRegister = async (formData) => {
     setStatus({ type: '', message: '' })
@@ -16,8 +18,9 @@ function Register() {
       // حفظ Access Token فـ LocalStorage
       localStorage.setItem('accessToken', data.accessToken)
       setStatus({ type: 'success', message: data.message || 'تم إنشاء الحساب بنجاح.' })
-      
-      // تقدر تزيد هنا التوجيه لصفحة الـ Dashboard مستقبلاً
+
+      // توجيه المستخدم لصفحة الـ Dashboard
+      navigate('/dashboard')
     } catch (error) {
       setStatus({
         type: 'error',
@@ -69,6 +72,13 @@ function Register() {
           )}
 
           <RegisterForm isSubmitting={isSubmitting} onSubmit={handleRegister} />
+
+          <p className="mt-6 text-center text-sm text-[#68776b]">
+            لديك حساب بالفعل؟{' '}
+            <Link to="/login" className="font-semibold text-[#b8731b] hover:text-[#174d3d]">
+              سجّل الدخول
+            </Link>
+          </p>
         </section>
       </div>
     </main>
