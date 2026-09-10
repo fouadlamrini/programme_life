@@ -13,6 +13,7 @@ const getSleep = async (req, res) => {
     }
 
     const schedule = await sleepService.getSleepSchedule({
+      userId: user._id,
       now: new Date(),
       location: {
         country: user.country,
@@ -45,6 +46,7 @@ const updateSleep = async (req, res) => {
     await user.save();
 
     const schedule = await sleepService.getSleepSchedule({
+      userId: user._id,
       now: new Date(),
       location: {
         country: user.country,

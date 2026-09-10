@@ -38,28 +38,19 @@ const toMinuteOfDay = (hhmm) => {
   return hours * 60 + minutes;
 };
 
-const addDays = (date, days) => {
-  const next = new Date(date);
-  next.setDate(next.getDate() + days);
-  return next;
-};
-
-const toDateKey = (date) => {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, '0');
-  const d = String(date.getDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
-};
-
 const hhmmOfIso = (iso) => (iso && iso.includes('T') ? iso.split('T')[1].slice(0, 5) : null);
 
 // ==========================================
 // BUILDER timeline لبرنامج يوم محدد
 // ==========================================
-// user          : كائن المستخدم (يحمل _id اختياري في هذه الخدمة: country, city, sleepTargetMinutes)
+// user          : كائن المستخدم (userId/isObjectId مطلوب + country, city, sleepTargetMinutes)
 // programmeDate : "YYYY-MM-DD" تاريخ بداية برنامج اليوم (فجر)
 // ==========================================
 const getPrayerTimeline = async ({ user, programmeDate }) => {
+  const userId = user?._id || user?.userId;
+  if (!userId) {
+    throw new Error('معرّف المستخدم مطلوب لبناء الـ timeline');
+  }
   const location = { country: user.country, city: user.city };
   const sleepTargetMinutes = user.sleepTargetMinutes != null ? user.sleepTargetMinutes : 480;
 
@@ -108,16 +99,19 @@ const getPrayerTimeline = async ({ user, programmeDate }) => {
   }
 
   // 3. النوم المرتبط بحد نهاية برنامج اليوم (الاستيقاظ عند فجر اليوم الموالي).
-  const nextDayKey = toDateKey(addDays(startDate, 1));
+  //    نمرر userId حتى تعرف SleepService: مدة صلاة العشاء + الأنشطة المٌلزمة المجدولة (TimeBlocks) بعد العشاء.
+  //    نستدعيها بنفس تاريخ برنامج اليوم (بداية الفجر) ليكون سياق العشاء والأنشطة متطابقاً مع هذا البرنامج اليوم.
   const sleep = await sleepService.getSleepSchedule({
-    now: new Date(`${nextDayKey}T${fajrClock}`),
+    userId,
+    now: new Date(`${programmeDate}T${fajrClock}`),
     location,
     sleepTargetMinutes
   });
 
   const sleepDuration = sleep.sleepDurationMinutes;
-  const sleepStartRel = capacityMinutes - sleepDuration;
-  if (sleepDuration <= 0 || sleepStartRel < 0 || sleepStartRel >= capacityMinutes) {
+  const sleepStartRel = sleep.sleepStartRel;
+  const sleepEndRel = sleep.sleepEndRel;
+  if (sleepDuration <= 0 || sleepStartRel < 0 || sleepStartRel > sleepEndRel) {
     throw new Error('فترة النوم المحسوبة غير صالحة');
   }
 
@@ -151,13 +145,18 @@ const getPrayerTimeline = async ({ user, programmeDate }) => {
     });
   }
 
-  // 6. حدود النوم داخل timeline + فترة قبل النوم (بعد العشاء إلى بداية النوم).
-  const ishaRelative = relative.isha;
-  const beforeSleepDuration = sleepStartRel - ishaRelative;
+  // 6. حدود النوم داخل timeline + فترة قبل النوم.
+  //    قبل النوم = الفترة من نهاية آخر قيد إلزامي إلى بداية النوم الفعلية.
+  const lastConstraint = sleep.constraints && sleep.constraints.length > 0
+    ? sleep.constraints[sleep.constraints.length - 1]
+    : null;
+  const beforeSleepStart = lastConstraint ? lastConstraint.end : times.isha;
+  const beforeSleepEndRel = lastConstraint ? lastConstraint.endRel : 0;
+  const beforeSleepDuration = sleepStartRel - beforeSleepEndRel;
   const beforeSleep = beforeSleepDuration > 0
     ? {
         type: 'BEFORE_SLEEP',
-        start: times.isha,
+        start: beforeSleepStart,
         end: sleep.sleepStart,
         durationMinutes: beforeSleepDuration,
         overnight: true
@@ -175,10 +174,20 @@ const getPrayerTimeline = async ({ user, programmeDate }) => {
     zones,
     beforeSleep,
     sleep: {
+      targetMinutes: sleep.sleepTargetMinutes,
+      calculatedStart: sleep.calculatedSleepStart,
       start: sleep.sleepStart,
       end: sleep.sleepEnd,
       durationMinutes: sleepDuration,
-      overnight: toMinuteOfDay(sleep.sleepStart) > toMinuteOfDay(sleep.sleepEnd)
+      wakeUpTime: sleep.wakeUpTime,
+      achieved: sleep.achieved,
+      overnight: sleep.overnight,
+      constraints: (sleep.constraints || []).map((constraint) => ({
+        type: constraint.type,
+        title: constraint.title,
+        start: constraint.start,
+        end: constraint.end
+      }))
     }
   };
 };

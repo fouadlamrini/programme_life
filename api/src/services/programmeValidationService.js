@@ -87,17 +87,17 @@ const validateProgrammeDay = async ({ user, programmeDate }) => {
   );
 
   // 2. فترة النوم المرتبطة بهذا البرنامج اليوم (الاستيقاظ عند فجر اليوم الموالي)
-  const nextDayFajr = new Date(`${addDaysKey(programmeDate, 1)}T${fajr}`);
   const sleep = await sleepService.getSleepSchedule({
-    now: nextDayFajr,
+    userId: user._id,
+    now: new Date(`${programmeDate}T${fajr}`),
     location,
     sleepTargetMinutes
   });
 
-  // النوم ينتهي عند نهاية سعة البرنامج اليوم (فجر الموالي) — تُحسب بالنِسب المطلقة لتجنب لبس اعبر منتصف الليل
+  // النوم الفعلي يبدأ بعد العشاء وبعد الأنشطة الإلزامية المجدولة — نقيسه بالنسب المطلقة (عبور منتصف الليل آمن)
   const sleepInterval = {
-    start: capacityMinutes - sleep.sleepDurationMinutes,
-    end: capacityMinutes
+    start: sleep.sleepStartRel,
+    end: sleep.sleepEndRel
   };
 
   // 3. الأنشطة المطبقة في ذلك اليوم فقط (repeatDays يتضمن يوم الأسبوع لبرنامج اليوم)
@@ -112,7 +112,9 @@ const validateProgrammeDay = async ({ user, programmeDate }) => {
     0
   );
 
-  const totalMinutes = activityMinutes + sleep.sleepDurationMinutes;
+  // الحاجة للنوم تبقى الهدف (النام المرغوب) لفحص قدرة 24 ساعة نظرياً
+  const sleepNeedMinutes = sleep.sleepTargetMinutes;
+  const totalMinutes = activityMinutes + sleepNeedMinutes;
   const remainingMinutes = capacityMinutes - totalMinutes;
 
   const violations = [];
@@ -185,7 +187,7 @@ const validateProgrammeDay = async ({ user, programmeDate }) => {
     },
     summary: {
       activityMinutes,
-      sleepMinutes: sleep.sleepDurationMinutes,
+      sleepMinutes: sleepNeedMinutes,
       totalMinutes,
       capacityMinutes,
       remainingMinutes
