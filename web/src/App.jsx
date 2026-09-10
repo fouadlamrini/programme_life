@@ -4,6 +4,7 @@ import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import Settings from './pages/Settings'
 import ChangePassword from './pages/ChangePassword'
+import Activities from './pages/Activities'
 
 function App() {
   return (
@@ -11,6 +12,7 @@ function App() {
       <Route path="/register" element={<Register />} />
       <Route path="/login" element={<Login />} />
       <Route path="/dashboard" element={<Dashboard />} />
+      <Route path="/activities" element={<Activities />} />
       <Route path="/settings" element={<Settings />} />
       <Route path="/settings/change-password" element={<ChangePassword />} />
       <Route path="*" element={<Navigate to="/login" replace />} />

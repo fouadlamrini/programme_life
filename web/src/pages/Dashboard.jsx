@@ -1,51 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { getActivitiesApi } from '../services/activityService'
-
-const DAY_LABELS = {
-  1: 'الاثنين',
-  2: 'الثلاثاء',
-  3: 'الأربعاء',
-  4: 'الخميس',
-  5: 'الجمعة',
-  6: 'السبت',
-  7: 'الأحد',
-}
-
-const TYPE_LABELS = {
-  PRAYER: 'صلاة',
-  QURAN: 'قرآن',
-  ADHKAR: 'أذكار',
-  DUA: 'دعاء',
-  SLEEP: 'نوم',
-  MEAL: 'وجبة',
-  STUDY: 'دراسة',
-  WORK: 'عمل',
-  SPORT: 'رياضة',
-  CHESS: 'شطرنج',
-  PERSONAL: 'شخصي',
-  OTHER: 'أخرى',
-}
-
-const PRIORITY_LABELS = {
-  NON_NEGOTIABLE: 'غير قابل للتفاوض',
-  HIGH: 'عالي',
-  MEDIUM: 'متوسط',
-  LOW: 'منخفض',
-}
-
-const PRIORITY_COLORS = {
-  NON_NEGOTIABLE: 'bg-[#fbe5dc] text-[#a44e20]',
-  HIGH: 'bg-[#f7e4b4] text-[#9a6512]',
-  MEDIUM: 'bg-[#e8eef4] text-[#3d5a80]',
-  LOW: 'bg-[#e3e8e4] text-[#68776b]',
-}
-
-function formatRepeatDays(repeatDays) {
-  if (!repeatDays || repeatDays.length === 0) return 'بدون تكرار'
-  if (repeatDays.length === 7) return 'يومياً'
-  return repeatDays.map((day) => DAY_LABELS[day] || day).join('، ')
-}
+import { TYPE_LABELS, PRIORITY_LABELS, PRIORITY_COLORS, formatRepeatDays } from '../constants/activityLabels'
 
 function Dashboard() {
   const navigate = useNavigate()
@@ -108,6 +64,12 @@ function Dashboard() {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <Link
+              className="rounded-xl border border-[#dfd2b7] bg-[#fffdf7] px-5 py-2.5 font-semibold text-[#174d3d] transition hover:bg-[#f7e4b4]"
+              to="/activities"
+            >
+              الأنشطة
+            </Link>
             <Link
               className="rounded-xl border border-[#dfd2b7] bg-[#fffdf7] px-5 py-2.5 font-semibold text-[#174d3d] transition hover:bg-[#f7e4b4]"
               to="/settings"
