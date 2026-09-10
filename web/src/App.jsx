@@ -7,6 +7,7 @@ import ChangePassword from './pages/ChangePassword'
 import Activities from './pages/Activities'
 import SleepSettings from './pages/SleepSettings'
 import Validation from './pages/Validation'
+import Timeline from './pages/Timeline'
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
       <Route path="/settings/change-password" element={<ChangePassword />} />
       <Route path="/settings/sleep" element={<SleepSettings />} />
       <Route path="/validation" element={<Validation />} />
+      <Route path="/timeline" element={<Timeline />} />
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   )
