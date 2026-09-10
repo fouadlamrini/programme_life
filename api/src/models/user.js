@@ -12,7 +12,9 @@ const userSchema = new mongoose.Schema({
   
   isPeriodMode: { type: Boolean, default: false },
   onboardingCompleted: { type: Boolean, default: false },
-  refreshToken: { type: String, default: null }
+  refreshToken: { type: String, default: null },
+  // مدة النوم المطلوبة بالدقائق (المستخدم يحددها فقط — وقت الاستيقاظ يُحسب دائماً من الفجر)
+  sleepTargetMinutes: { type: Number, default: 480, min: 60, max: 1440 }
 }, { timestamps: true });
 
 module.exports = mongoose.model('User', userSchema);
