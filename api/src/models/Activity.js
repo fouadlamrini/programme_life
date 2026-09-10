@@ -13,7 +13,9 @@ const activitySchema = new mongoose.Schema({
   },
   durationMinutes: { 
     type: Number, 
-    required: true 
+    required: true,
+    min: 1,
+    max: 1440
   },
   
   // خانة التوقيت المطلوبة للجدولة الأوتوماتيكية
@@ -69,6 +71,18 @@ type: {
     'OTHER'
   ],
   default: 'OTHER'
+},
+
+// نشاط افتراضي جَا من التهيئة الأولية للمستخدم
+isDefault: { 
+  type: Boolean, 
+  default: false 
+},
+
+// نشاط نظامي لا يمكن حذفه (مثل الصلوات)
+isSystem: { 
+  type: Boolean, 
+  default: false 
 },
   
   // نشاط بديل مخصص لمرحلة العذر الشرعي
