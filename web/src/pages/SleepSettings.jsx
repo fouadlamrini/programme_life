@@ -150,6 +150,10 @@ function SleepSettings() {
               {sleep && (
                 <dl className="mt-6 grid gap-3">
                   <div className="flex items-center justify-between rounded-2xl border border-[#e5dbc4] bg-[#fbf8ef] px-4 py-3">
+                    <dt className="text-sm text-[#68776b]">الهدف (المدة المطلوبة)</dt>
+                    <dd className="font-semibold text-[#174d3d]">{formatHours(sleep.sleepTargetMinutes)}</dd>
+                  </div>
+                  <div className="flex items-center justify-between rounded-2xl border border-[#e5dbc4] bg-[#fbf8ef] px-4 py-3">
                     <dt className="text-sm text-[#68776b]">الفجر</dt>
                     <dd className="font-semibold text-[#174d3d]">{sleep.fajr}</dd>
                   </div>
@@ -162,8 +166,11 @@ function SleepSettings() {
                     <dd className="font-semibold text-[#174d3d]">{sleep.sleepStart} ← {sleep.sleepEnd}</dd>
                   </div>
                   <div className="flex items-center justify-between rounded-2xl border border-[#e5dbc4] bg-[#fbf8ef] px-4 py-3">
-                    <dt className="text-sm text-[#68776b]">المدة المحسوبة</dt>
-                    <dd className="font-semibold text-[#174d3d]">{formatHours(sleep.sleepDurationMinutes)}</dd>
+                    <dt className="text-sm text-[#68776b]">المدة الفعلية</dt>
+                    <dd className="font-semibold text-[#174d3d]">
+                      {formatHours(sleep.sleepDurationMinutes)}
+                      {!sleep.achieved && <span className="mr-2 rounded-full bg-[#fbe5dc] px-2.5 py-0.5 text-xs font-semibold text-[#a44e20]">أقل من الهدف</span>}
+                    </dd>
                   </div>
                   <p className="pt-1 text-center text-xs text-[#68776b]">{sleep.programmeDate}</p>
                 </dl>

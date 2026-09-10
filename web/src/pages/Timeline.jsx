@@ -35,6 +35,15 @@ const formatDuration = (minutes) => {
   return remainder ? `${hours}س ${remainder}د` : `${hours}س`
 }
 
+const formatDurationWords = (minutes) => {
+  const total = Math.round(minutes || 0)
+  const hours = Math.floor(total / 60)
+  const remainder = total % 60
+  if (!hours) return `${remainder} دقيقة`
+  if (!remainder) return hours === 1 ? 'ساعة واحدة' : `${hours} ساعات`
+  return `${hours} ساعات و${remainder} دقيقة`
+}
+
 const formatProgrammeDate = (dateKey) => {
   if (!dateKey) return '—'
   const [year, month, day] = dateKey.split('-').map(Number)
@@ -251,18 +260,64 @@ function Timeline() {
                         يمتد عبر منتصف الليل
                       </span>
                     )}
+                    {!timeline.sleep.achieved && (
+                      <span className="rounded-full bg-[#fbe5dc] px-2.5 py-0.5 text-xs font-semibold text-[#a44e20]">
+                        الهدف غير مكتمل
+                      </span>
+                    )}
                   </div>
                   <div className="flex items-center gap-3 text-sm text-[#53665b]">
                     <span className="font-semibold text-[#123d32]">
                       {timeline.sleep.start} ← {timeline.sleep.end}
                     </span>
                     <span className="rounded-full bg-[#dcebdd] px-2.5 py-0.5 text-xs font-semibold text-[#236247]">
-                      {formatDuration(timeline.sleep.durationMinutes)}
+                      النوم الفعلي: {formatDuration(timeline.sleep.durationMinutes)}
                     </span>
                   </div>
                 </div>
+
+                <dl className="mt-3 grid gap-2 sm:grid-cols-2">
+                  <div className="flex items-center justify-between rounded-xl border border-[#e5dbc4] bg-white px-3 py-2">
+                    <dt className="text-sm text-[#68776b]">الهدف</dt>
+                    <dd className="font-semibold text-[#174d3d]">{formatDurationWords(timeline.sleep.targetMinutes)}</dd>
+                  </div>
+                  <div className="flex items-center justify-between rounded-xl border border-[#e5dbc4] bg-white px-3 py-2">
+                    <dt className="text-sm text-[#68776b]">النوم الفعلي</dt>
+                    <dd className="font-semibold text-[#174d3d]">{formatDurationWords(timeline.sleep.durationMinutes)}</dd>
+                  </div>
+                  <div className="flex items-center justify-between rounded-xl border border-[#e5dbc4] bg-white px-3 py-2 sm:col-span-2">
+                    <dt className="text-sm text-[#68776b]">بداية نظرية (الفجر - الهدف)</dt>
+                    <dd className="font-semibold text-[#174d3d]">{timeline.sleep.calculatedStart}</dd>
+                  </div>
+                </dl>
+
+                {!timeline.sleep.achieved && (
+                  <p className="mt-3 rounded-xl bg-[#fbe5dc] px-4 py-3 text-sm text-[#a44e20]" role="alert">
+                    الهدف لا يمكن تحقيقه لأن النوم لا يبدأ إلا بعد استكمال العشاء وبعد الأنشطة الإلزامية المجدولة قبله.
+                  </p>
+                )}
+
+                {timeline.sleep.constraints?.length > 0 && (
+                  <div className="mt-3">
+                    <p className="mb-1.5 text-xs font-bold text-[#68776b]">أنشطة واجبة قبل النوم</p>
+                    <ul className="space-y-1.5">
+                      {timeline.sleep.constraints.map((constraint, index) => (
+                        <li
+                          key={`${constraint.type}-${index}`}
+                          className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-[#e5dbc4] bg-white px-3 py-2 text-sm"
+                        >
+                          <span className="font-semibold text-[#174d3d]">{constraint.title}</span>
+                          <span className="text-[#53665b]">
+                            {constraint.start} ← {constraint.end}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
                 <p className="mt-2 text-xs text-[#68776b]">
-                  حد النوم محسوب من إعدادات النوم الخاصة بك (ينتهي عند فجر اليوم الموالي).
+                  حد النوم محسوب من إعدادات النوم الخاصة بك وينتهي عند فجر اليوم الموالي.
                 </p>
               </div>
             </div>

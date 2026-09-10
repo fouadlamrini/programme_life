@@ -9,6 +9,7 @@ import {
 } from '../services/activityService'
 import {
   TYPE_LABELS,
+  TIME_SLOT_LABELS,
   PRIORITY_LABELS,
   PRIORITY_COLORS,
   formatRepeatDays,
@@ -196,7 +197,7 @@ function Activities() {
                     <div className="mt-3 flex flex-col gap-1 text-sm text-[#53665b]">
                       <span>المدة: {activity.durationMinutes} دقيقة</span>
                       <span>التكرار: {formatRepeatDays(activity.repeatDays)}</span>
-                      <span>الخانة: {activity.preferredTimeSlot}</span>
+                      <span>الخانة: {TIME_SLOT_LABELS[activity.preferredTimeSlot] || activity.preferredTimeSlot}</span>
                     </div>
                   </div>
                   <div className="flex items-center justify-between">

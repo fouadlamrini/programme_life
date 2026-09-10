@@ -12,10 +12,10 @@ export const DAY_ORDER = [1, 2, 3, 4, 5, 6, 7]
 
 export const TYPE_LABELS = {
   PRAYER: 'صلاة',
-  QURAN: 'قرآن',
-  ADHKAR: 'أذكار',
-  DUA: 'دعاء',
-  SLEEP: 'نوم',
+  QURAN: 'القرآن',
+  ADHKAR: 'الأذكار',
+  DUA: 'الدعاء',
+  SLEEP: 'النوم',
   MEAL: 'وجبة',
   STUDY: 'دراسة',
   WORK: 'عمل',
@@ -26,19 +26,19 @@ export const TYPE_LABELS = {
 }
 
 export const TIME_SLOT_LABELS = {
-  AT_PRAYER_TIME: 'في وقت الصلاة',
+  AT_PRAYER_TIME: 'وقت الصلاة',
   POST_FAJR: 'بعد الفجر',
   POST_DHUHR: 'بعد الظهر',
   POST_ASR: 'بعد العصر',
   POST_MAGHRIB: 'بعد المغرب',
   POST_ISHA: 'بعد العشاء',
   BEFORE_SLEEP: 'قبل النوم',
-  ANYTIME: 'في أي وقت',
+  ANYTIME: 'أي وقت',
 }
 
 export const PRIORITY_LABELS = {
   NON_NEGOTIABLE: 'غير قابل للتفاوض',
-  HIGH: 'عالي',
+  HIGH: 'مرتفع',
   MEDIUM: 'متوسط',
   LOW: 'منخفض',
 }
@@ -49,6 +49,13 @@ export const PRIORITY_COLORS = {
   MEDIUM: 'bg-[#e8eef4] text-[#3d5a80]',
   LOW: 'bg-[#e3e8e4] text-[#68776b]',
   OTHER: 'bg-[#e3e8e4] text-[#68776b]',
+}
+
+export const STATUS_LABELS = {
+  PENDING: 'في الانتظار',
+  IN_PROGRESS: 'قيد التنفيذ',
+  COMPLETED: 'مكتمل',
+  SKIPPED: 'متخطى',
 }
 
 export const formatRepeatDays = (repeatDays) => {
