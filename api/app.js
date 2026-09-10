@@ -7,6 +7,7 @@ const activityRoutes = require('./src/routes/activityRoutes');
 const programmeDayRoutes = require('./src/routes/programmeDayRoutes');
 const sleepRoutes = require('./src/routes/sleepRoutes');
 const programmeValidationRoutes = require('./src/routes/programmeValidationRoutes');
+const prayerTimelineRoutes = require('./src/routes/prayerTimelineRoutes');
 
 const app = express();
 
@@ -35,5 +36,8 @@ app.use('/api/sleep', sleepRoutes);
 
 // 7. Register Programme Validation Routes
 app.use('/api/programme-validation', programmeValidationRoutes);
+
+// 8. Register Prayer Time Based Timeline Routes
+app.use('/api/prayer-timeline', prayerTimelineRoutes);
 
 module.exports = app;
