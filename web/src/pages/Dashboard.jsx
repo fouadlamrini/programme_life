@@ -115,6 +115,12 @@ function Dashboard() {
             </Link>
             <Link
               className="rounded-xl border border-[#dfd2b7] bg-[#fffdf7] px-5 py-2.5 font-semibold text-[#174d3d] transition hover:bg-[#f7e4b4]"
+              to="/validation"
+            >
+              التحقق
+            </Link>
+            <Link
+              className="rounded-xl border border-[#dfd2b7] bg-[#fffdf7] px-5 py-2.5 font-semibold text-[#174d3d] transition hover:bg-[#f7e4b4]"
               to="/settings"
             >
               الإعدادات
