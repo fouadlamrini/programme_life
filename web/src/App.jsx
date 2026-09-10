@@ -8,6 +8,7 @@ import Activities from './pages/Activities'
 import SleepSettings from './pages/SleepSettings'
 import Validation from './pages/Validation'
 import Timeline from './pages/Timeline'
+import TimeBlocks from './pages/TimeBlocks'
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
       <Route path="/settings/sleep" element={<SleepSettings />} />
       <Route path="/validation" element={<Validation />} />
       <Route path="/timeline" element={<Timeline />} />
+      <Route path="/time-blocks" element={<TimeBlocks />} />
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   )
