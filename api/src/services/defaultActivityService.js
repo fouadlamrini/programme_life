@@ -30,9 +30,9 @@ const defaultActivityList = [
   { title: 'صلاة الجمعة', type: 'PRAYER', durationMinutes: 30, preferredTimeSlot: AT_PRAYER_TIME, priority: NON_NEGOTIABLE, repeatDays: FRIDAY },
   { title: 'سورة الكهف', type: 'QURAN', durationMinutes: 30, preferredTimeSlot: ANYTIME, priority: HIGH, repeatDays: FRIDAY },
   { title: 'النوم', type: 'SLEEP', durationMinutes: 480, preferredTimeSlot: BEFORE_SLEEP, priority: NON_NEGOTIABLE, repeatDays: ALL_WEEKDAYS },
-  { title: 'الفطور', type: 'MEAL', durationMinutes: 30, preferredTimeSlot: ANYTIME, priority: MEDIUM, repeatDays: ALL_WEEKDAYS },
-  { title: 'الغداء', type: 'MEAL', durationMinutes: 30, preferredTimeSlot: ANYTIME, priority: MEDIUM, repeatDays: ALL_WEEKDAYS },
-  { title: 'العشاء', type: 'MEAL', durationMinutes: 30, preferredTimeSlot: ANYTIME, priority: MEDIUM, repeatDays: ALL_WEEKDAYS }
+  { title: 'الفطور', type: 'MEAL', durationMinutes: 30, preferredTimeSlot: ANYTIME, priority: NON_NEGOTIABLE, repeatDays: ALL_WEEKDAYS },
+  { title: 'الغداء', type: 'MEAL', durationMinutes: 30, preferredTimeSlot: ANYTIME, priority: NON_NEGOTIABLE, repeatDays: ALL_WEEKDAYS },
+  { title: 'العشاء', type: 'MEAL', durationMinutes: 30, preferredTimeSlot: ANYTIME, priority: NON_NEGOTIABLE, repeatDays: ALL_WEEKDAYS }
 ];
 
 // خلق الأنشطة الافتراضية ديال المستخدم (آمن ضد التكرار)
