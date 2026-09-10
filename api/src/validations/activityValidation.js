@@ -39,8 +39,8 @@ const dedupeAndSortDays = (days) => {
 const activityBodyRules = (optional = false) => [
   body('title')
     .if(optional ? (_, { req }) => req.body.title !== undefined : () => true)
-    .notEmpty().withMessage('عنوان النشاط مطلوب')
-    .trim(),
+    .trim()
+    .notEmpty().withMessage('عنوان النشاط مطلوب'),
 
   body('durationMinutes')
     .if(optional ? (_, { req }) => req.body.durationMinutes !== undefined : () => true)
