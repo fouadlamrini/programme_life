@@ -6,6 +6,7 @@ const profileRoutes = require('./src/routes/profileRoutes');
 const activityRoutes = require('./src/routes/activityRoutes');
 const programmeDayRoutes = require('./src/routes/programmeDayRoutes');
 const sleepRoutes = require('./src/routes/sleepRoutes');
+const programmeValidationRoutes = require('./src/routes/programmeValidationRoutes');
 
 const app = express();
 
@@ -31,5 +32,8 @@ app.use('/api/programme-day', programmeDayRoutes);
 
 // 6. Register Sleep Routes
 app.use('/api/sleep', sleepRoutes);
+
+// 7. Register Programme Validation Routes
+app.use('/api/programme-validation', programmeValidationRoutes);
 
 module.exports = app;
