@@ -17,6 +17,7 @@
 const prayerTimeService = require('./prayerTimeService');
 const programmeDayService = require('./programmeDayService');
 const sleepService = require('./sleepService');
+const User = require('../models/user');
 const Activity = require('../models/Activity');
 const DailySchedule = require('../models/DailySchedule');
 
@@ -61,16 +62,21 @@ const toRelativeMinutes = (hhmm, fajrMinute) => {
 const intervalsOverlap = (a, b) => a.start < b.end && b.start < a.end;
 
 // ==========================================
-// التحقق من برنامج يوم محدد
+// سياق برنامج اليوم المشترك (الخدمات المستهلكة)
 // ==========================================
-// user          : وثيقة/كائن المستخدم (يجب أن يحتوي _id, country, city, sleepTargetMinutes)
-// programmeDate : "YYYY-MM-DD" تاريخ بداية برنامج اليوم (فجر)
+// يحسب: أوقات برنامج اليوم (فجر → فجر الموالي) + فترة النوم المحمية + سعة اليوم.
+// يُستعمل من قبل: ProgrammeValidationService (فحص التخالفات) و TimeBlockService
+// (رفض الفقرات التي تتداخل مع فترة النوم المحمية) — دون تكرار منطق حساب النوم.
 // ==========================================
-const validateProgrammeDay = async ({ user, programmeDate }) => {
+const getDayContext = async ({ userId, programmeDate }) => {
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new Error('المستخدم غير موجود');
+  }
+
   const location = { country: user.country, city: user.city };
   const sleepTargetMinutes = user.sleepTargetMinutes != null ? user.sleepTargetMinutes : 480;
 
-  // 1. برنامج اليوم: الفجر(programmeDate) → فجر اليوم الموالي
   const fajrTimes = await prayerTimeService.getPrayerTimes(
     startOfLocalDay(programmeDate),
     location
@@ -86,19 +92,41 @@ const validateProgrammeDay = async ({ user, programmeDate }) => {
     (new Date(programmeDay.end).getTime() - new Date(programmeDay.start).getTime()) / 60000
   );
 
-  // 2. فترة النوم المرتبطة بهذا البرنامج اليوم (الاستيقاظ عند فجر اليوم الموالي)
   const sleep = await sleepService.getSleepSchedule({
-    userId: user._id,
+    userId,
     now: new Date(`${programmeDate}T${fajr}`),
     location,
     sleepTargetMinutes
   });
 
-  // النوم الفعلي يبدأ بعد العشاء وبعد الأنشطة الإلزامية المجدولة — نقيسه بالنسب المطلقة (عبور منتصف الليل آمن)
-  const sleepInterval = {
-    start: sleep.sleepStartRel,
-    end: sleep.sleepEndRel
+  return {
+    user,
+    location,
+    fajr,
+    fajrMinute: toMinuteOfDay(fajr),
+    capacityMinutes,
+    programmeDay,
+    sleep,
+    sleepInterval: {
+      start: sleep.sleepStartRel,
+      end: sleep.sleepEndRel
+    }
   };
+};
+
+// ==========================================
+// التحقق من برنامج يوم محدد
+// ==========================================
+// user          : وثيقة/كائن المستخدم (يجب أن يحتوي _id, country, city, sleepTargetMinutes)
+// programmeDate : "YYYY-MM-DD" تاريخ بداية برنامج اليوم (فجر)
+// ==========================================
+const validateProgrammeDay = async ({ user, programmeDate }) => {
+  const ctx = await getDayContext({
+    userId: user._id,
+    programmeDate
+  });
+
+  const { fajr, capacityMinutes, sleepInterval, programmeDay } = ctx;
 
   // 3. الأنشطة المطبقة في ذلك اليوم فقط (repeatDays يتضمن يوم الأسبوع لبرنامج اليوم)
   const weekday = weekdayNumber(programmeDate);
@@ -113,7 +141,7 @@ const validateProgrammeDay = async ({ user, programmeDate }) => {
   );
 
   // الحاجة للنوم تبقى الهدف (النام المرغوب) لفحص قدرة 24 ساعة نظرياً
-  const sleepNeedMinutes = sleep.sleepTargetMinutes;
+  const sleepNeedMinutes = ctx.sleep.sleepTargetMinutes;
   const totalMinutes = activityMinutes + sleepNeedMinutes;
   const remainingMinutes = capacityMinutes - totalMinutes;
 
@@ -198,6 +226,7 @@ const validateProgrammeDay = async ({ user, programmeDate }) => {
 
 module.exports = {
   validateProgrammeDay,
+  getDayContext,
   weekdayNumber,
   toRelativeMinutes,
   intervalsOverlap

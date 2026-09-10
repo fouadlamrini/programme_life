@@ -8,6 +8,7 @@ const programmeDayRoutes = require('./src/routes/programmeDayRoutes');
 const sleepRoutes = require('./src/routes/sleepRoutes');
 const programmeValidationRoutes = require('./src/routes/programmeValidationRoutes');
 const prayerTimelineRoutes = require('./src/routes/prayerTimelineRoutes');
+const timeBlockRoutes = require('./src/routes/timeBlockRoutes');
 
 const app = express();
 
@@ -39,5 +40,8 @@ app.use('/api/programme-validation', programmeValidationRoutes);
 
 // 8. Register Prayer Time Based Timeline Routes
 app.use('/api/prayer-timeline', prayerTimelineRoutes);
+
+// 9. Register Time Block Routes (Daily Schedule /api/daily-schedules/:date/time-blocks)
+app.use('/api/daily-schedules', timeBlockRoutes);
 
 module.exports = app;

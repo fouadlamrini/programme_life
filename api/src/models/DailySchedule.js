@@ -33,4 +33,7 @@ const dailyScheduleSchema = new mongoose.Schema({
   timeBlocks: [timeBlockSchema]
 }, { timestamps: true });
 
+// منع الجداول اليومية المكررة لنفس المستخدم ونفس اليوم
+dailyScheduleSchema.index({ userId: 1, date: 1 }, { unique: true });
+
 module.exports = mongoose.model('DailySchedule', dailyScheduleSchema);
