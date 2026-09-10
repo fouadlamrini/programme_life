@@ -2,7 +2,7 @@ import axios from 'axios'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
 
-const api = axios.create({
+export const api = axios.create({
   baseURL: API_BASE_URL,
   withCredentials: true,
   headers: {
@@ -70,15 +70,5 @@ export const changePasswordApi = async (passwordData) => {
     const data = error.response?.data
     const validationMessage = data?.errors?.map((err) => err.msg).join(', ')
     throw new Error(validationMessage || data?.message || 'تعذر تغيير كلمة المرور.', { cause: error })
-  }
-}
-
-export const getActivitiesApi = async () => {
-  try {
-    const response = await api.get('/activities')
-    return response.data
-  } catch (error) {
-    const data = error.response?.data
-    throw new Error(data?.message || 'تعذر جلب الأنشطة.', { cause: error })
   }
 }

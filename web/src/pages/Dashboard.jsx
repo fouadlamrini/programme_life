@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { getActivitiesApi } from '../services/authService'
+import { getActivitiesApi } from '../services/activityService'
 
 const DAY_LABELS = {
   1: 'الاثنين',
