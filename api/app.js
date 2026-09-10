@@ -4,6 +4,7 @@ const cors = require('cors');
 const authRoutes = require('./src/routes/authRoutes');
 const profileRoutes = require('./src/routes/profileRoutes');
 const activityRoutes = require('./src/routes/activityRoutes');
+const programmeDayRoutes = require('./src/routes/programmeDayRoutes');
 
 const app = express();
 
@@ -23,5 +24,8 @@ app.use('/api/profile', profileRoutes);
 
 // 4. Register Activity Routes
 app.use('/api/activities', activityRoutes);
+
+// 5. Register Programme Day Routes
+app.use('/api/programme-day', programmeDayRoutes);
 
 module.exports = app;
