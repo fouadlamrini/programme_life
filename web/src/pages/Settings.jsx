@@ -90,7 +90,7 @@ function Settings() {
           </div>
         </header>
 
-        <div className="grid gap-6 lg:grid-cols-2">
+<div className="grid gap-6 lg:grid-cols-3">
           {/* قسم البيانات الشخصية */}
           <section className="rounded-3xl border border-[#dfd2b7] bg-[#fffdf7] p-8 shadow-xl shadow-[#123d32]/10">
             <h2 className="text-xl font-semibold">البيانات الشخصية</h2>
@@ -121,6 +121,20 @@ function Settings() {
               to="/settings/change-password"
             >
               تغيير كلمة المرور
+            </Link>
+          </section>
+
+          {/* قسم النوم */}
+          <section className="flex flex-col rounded-3xl border border-[#dfd2b7] bg-[#fffdf7] p-8 shadow-xl shadow-[#123d32]/10">
+            <h2 className="text-xl font-semibold">إعدادات النوم</h2>
+            <p className="mt-2 text-[#68776b]">
+              حدد مدة نومك وسيُحسب وقت الاستيقاظ تلقائياً من موعد الفجر.
+            </p>
+            <Link
+              className="mt-auto rounded-xl bg-[#b8731b] px-5 py-3.5 text-center font-semibold text-[#fffdf7] transition hover:bg-[#174d3d] focus:outline-none focus:ring-4 focus:ring-[#f7e4b4]"
+              to="/settings/sleep"
+            >
+              إعدادات النوم
             </Link>
           </section>
         </div>
