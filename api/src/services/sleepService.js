@@ -192,7 +192,7 @@ const getSleepSchedule = async ({ userId, now = new Date(), location = {}, sleep
     if (schedule && Array.isArray(schedule.timeBlocks)) {
       for (const block of schedule.timeBlocks) {
         // نحترم فقط النشاطات الإلزامية (NON_NEGOTIABLE) — الواجب إنجازها قبل النوم
-        if (block.priority !== REQUIRED_PRIORITY) continue;
+        if (block.priority !== REQUIRED_PRIORITY && block.priority !== 'HIGH') continue;
 
         const blockStartRel = toRelativeMinutes(block.startTime, fajrMinute);
         const blockEndRel = toRelativeMinutes(block.endTime, fajrMinute);

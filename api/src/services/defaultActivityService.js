@@ -25,7 +25,7 @@ const defaultActivityList = [
   { title: 'صلاة العشاء', type: 'PRAYER', durationMinutes: 10, preferredTimeSlot: AT_PRAYER_TIME, priority: NON_NEGOTIABLE, repeatDays: ALL_WEEKDAYS },
   { title: 'قراءة القرآن', type: 'QURAN', durationMinutes: 30, preferredTimeSlot: POST_FAJR, priority: HIGH, repeatDays: ALL_WEEKDAYS },
   { title: 'أذكار الصباح', type: 'ADHKAR', durationMinutes: 15, preferredTimeSlot: POST_FAJR, priority: HIGH, repeatDays: ALL_WEEKDAYS },
-  { title: 'أذكار المساء', type: 'ADHKAR', durationMinutes: 15, preferredTimeSlot: POST_MAGHRIB, priority: HIGH, repeatDays: ALL_WEEKDAYS },
+  { title: 'أذكار المساء', type: 'ADHKAR', durationMinutes: 15, preferredTimeSlot: 'POST_ASR', priority: HIGH, repeatDays: ALL_WEEKDAYS },
   { title: 'الدعاء', type: 'DUA', durationMinutes: 10, preferredTimeSlot: BEFORE_SLEEP, priority: HIGH, repeatDays: ALL_WEEKDAYS },
   { title: 'صلاة الجمعة', type: 'PRAYER', durationMinutes: 30, preferredTimeSlot: AT_PRAYER_TIME, priority: NON_NEGOTIABLE, repeatDays: FRIDAY },
   { title: 'سورة الكهف', type: 'QURAN', durationMinutes: 30, preferredTimeSlot: ANYTIME, priority: HIGH, repeatDays: FRIDAY },
