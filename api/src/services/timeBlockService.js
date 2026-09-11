@@ -19,9 +19,11 @@ const Activity = require('../models/Activity');
 const DailySchedule = require('../models/DailySchedule');
 const programmeDayService = require('./programmeDayService');
 const programmeValidationService = require('./programmeValidationService');
+const { isSystemPrayerActivity, resolvePrayerKey, resolvePrayerTime, ensurePrayerTimeBlocks } = require('./defaultTimeBlockService');
 const {
   isValidHHMM,
   toMinuteOfDay,
+  toHHMM,
   toInterval,
   intervalDuration,
   intervalsOverlap,
@@ -61,7 +63,7 @@ const findSchedule = async (userId, programmeDate) => {
 // ==========================================
 // إنشاء DailySchedule إن لم يوجد (بدون تكرار — فهرس فريد userId+date)
 // ==========================================
-const ensureSchedule = async (userId, programmeDate) => {
+const ensureSchedule = async (userId, programmeDate, location) => {
   let schedule = await findSchedule(userId, programmeDate);
   if (schedule) return schedule;
 
@@ -79,6 +81,11 @@ const ensureSchedule = async (userId, programmeDate) => {
       if (schedule) return schedule;
     }
     throw error;
+  }
+
+  // ضمان فقرات الصلاة بعد إنشاء الجدولة
+  if (location) {
+    await ensurePrayerTimeBlocks({ userId, programmeDate, schedule, location });
   }
 
   return schedule;
@@ -164,11 +171,7 @@ const assertValidDuration = ({ activity, interval, startTime, endTime }) => {
 // ==========================================
 const createTimeBlock = async ({ userId, programmeDate, body }) => {
   if (!programmeDate) {
-    throw createHttpError(400, 'التاريخ مطلوب');
-  }
-
-  if (!isValidHHMM(body.startTime) || !isValidHHMM(body.endTime)) {
-    throw createHttpError(400, 'التوقيت يجب أن يكون بصيغة HH:mm');
+    throw createHttpError(400, '\u0627\u0644\u062a\u0627\u0631\u064a\u062e \u0645\u0637\u0644\u0648\u0628');
   }
 
   const ctx = await programmeValidationService.getDayContext({ userId, programmeDate });
@@ -176,20 +179,56 @@ const createTimeBlock = async ({ userId, programmeDate, body }) => {
   const activityId = body.activityId || null;
   const activity = await resolveActivity(userId, activityId);
 
-  const startTime = body.startTime;
-  const endTime = body.endTime;
+  let startTime = body.startTime;
+  let endTime = body.endTime;
+
+  if (isSystemPrayerActivity(activity)) {
+    const prayerKey = resolvePrayerKey(activity);
+    if (!prayerKey) {
+      throw createHttpError(400, '\u0644\u0627 \u064a\u0645\u0643\u0646 \u062a\u062d\u062f\u064a\u062f \u0648\u0642\u062a \u0627\u0644\u0635\u0644\u0627\u0629 \u0644\u0647\u0630\u0627 \u0627\u0644\u0646\u0634\u0627\u0637 \u2014 \u0627\u0633\u0645 \u0627\u0644\u0635\u0644\u0627\u0629 \u063a\u064a\u0631 \u0645\u0639\u0631\u0648\u0641');
+    }
+    startTime = await resolvePrayerTime(prayerKey, programmeDate, ctx.location);
+    if (!startTime) {
+      throw createHttpError(400, '\u0648\u0642\u062a \u0627\u0644\u0635\u0644\u0627\u0629 \u0644\u0647\u0630\u0627 \u0627\u0644\u0646\u0634\u0627\u0637 \u063a\u064a\u0631 \u0645\u062a\u0648\u0641\u0631');
+    }
+    endTime = toHHMM(toMinuteOfDay(startTime) + activity.durationMinutes);
+  } else if (!isValidHHMM(body.startTime) || !isValidHHMM(body.endTime)) {
+    throw createHttpError(400, '\u0627\u0644\u062a\u0648\u0642\u064a\u062a \u064a\u062c\u0628 \u0623\u0646 \u064a\u0643\u0648\u0646 \u0628\u0635\u064a\u063a\u0629 HH:mm');
+  }
 
   const interval = buildInterval({ ctx, startTime, endTime });
   assertValidDuration({ activity, interval, startTime, endTime });
 
-  const schedule = await ensureSchedule(userId, programmeDate);
-  const blocks = schedule.timeBlocks || [];
+  const schedule = await ensureSchedule(userId, programmeDate, ctx.location);
+  await ensurePrayerTimeBlocks({ userId, programmeDate, schedule, location: ctx.location });
 
+  if (isSystemPrayerActivity(activity)) {
+    const existing = (schedule.timeBlocks || []).find(
+      (b) => String(b.activityId) === String(activity._id)
+    );
+    if (existing) {
+      return {
+        message: '\u0641\u0642\u0631\u0629 \u0627\u0644\u0635\u0644\u0627\u0629 \u0647\u0630\u0647 \u0645\u0648\u062c\u0648\u062f\u0629 \u0645\u0633\u0628\u0642\u0627\u064b \u0628\u0627\u0644\u062a\u0648\u0642\u064a\u062a \u0627\u0644\u0635\u062d\u064a\u062d',
+        scheduleId: schedule._id,
+        scheduleDate: programmeDate,
+        timeBlock: {
+          _id: existing._id,
+          activityId: existing.activityId || null,
+          title: existing.title,
+          startTime: existing.startTime,
+          endTime: existing.endTime,
+          priority: existing.priority || null,
+          status: existing.status
+        }
+      };
+    }
+  }
+
+  const blocks = schedule.timeBlocks || [];
   assertNotInsideSleep({ ctx, candidate: interval });
   assertNoOverlap({ blocks, candidate: interval, excludeId: null, ctx });
 
-  const priority =
-    body.priority !== undefined && !activity ? body.priority : undefined;
+  const priority = body.priority !== undefined && !activity ? body.priority : undefined;
 
   schedule.timeBlocks.push({
     activityId: activity ? activity._id : undefined,
@@ -205,7 +244,7 @@ const createTimeBlock = async ({ userId, programmeDate, body }) => {
   const created = schedule.timeBlocks[schedule.timeBlocks.length - 1];
 
   return {
-    message: 'تم إنشاء الفقرة الزمنية بنجاح',
+    message: '\u062a\u0645 \u0625\u0646\u0634\u0627\u0621 \u0627\u0644\u0641\u0642\u0631\u0629 \u0627\u0644\u0632\u0645\u0646\u064a\u0629 \u0628\u0646\u062c\u0627\u062d',
     scheduleId: schedule._id,
     scheduleDate: programmeDate,
     timeBlock: {
@@ -227,9 +266,12 @@ const listTimeBlocks = async ({ userId, programmeDate }) => {
   const ctx = await programmeValidationService.getDayContext({ userId, programmeDate });
   const schedule = await findSchedule(userId, programmeDate);
 
-  if (!schedule || !Array.isArray(schedule.timeBlocks) || schedule.timeBlocks.length === 0) {
+  if (!schedule) {
     return { scheduleExists: false, programmeDate, timeBlocks: [] };
   }
+
+  // Ensure prayer blocks exist on the existing schedule (idempotent)
+  await ensurePrayerTimeBlocks({ userId, programmeDate, schedule, location: ctx.location });
 
   const blocks = [...schedule.timeBlocks].sort((a, b) => {
     const aStart = toInterval(a.startTime, a.endTime, ctx.fajrMinute, ctx.capacityMinutes).start;
@@ -283,27 +325,48 @@ const getTimeBlock = async ({ userId, programmeDate, blockId }) => {
 // ==========================================
 const updateTimeBlock = async ({ userId, programmeDate, blockId, body }) => {
   if (body.startTime !== undefined && !isValidHHMM(body.startTime)) {
-    throw createHttpError(400, 'التوقيت يجب أن يكون بصيغة HH:mm');
+    throw createHttpError(400, '\u0627\u0644\u062a\u0648\u0642\u064a\u062a \u064a\u062c\u0628 \u0623\u0646 \u064a\u0643\u0648\u0646 \u0628\u0635\u064a\u063a\u0629 HH:mm');
   }
   if (body.endTime !== undefined && !isValidHHMM(body.endTime)) {
-    throw createHttpError(400, 'التوقيت يجب أن يكون بصيغة HH:mm');
+    throw createHttpError(400, '\u0627\u0644\u062a\u0648\u0642\u064a\u062a \u064a\u062c\u0628 \u0623\u0646 \u064a\u0643\u0648\u0646 \u0628\u0635\u064a\u063a\u0629 HH:mm');
   }
 
   const ctx = await programmeValidationService.getDayContext({ userId, programmeDate });
   const schedule = await findSchedule(userId, programmeDate);
   if (!schedule) {
-    throw createHttpError(404, 'الجدولة اليومية غير موجودة لهذا المستخدم');
+    throw createHttpError(404, '\u0627\u0644\u062c\u062f\u0648\u0644\u0629 \u0627\u0644\u064a\u0648\u0645\u064a\u0629 \u063a\u064a\u0631 \u0645\u0648\u062c\u0648\u062f\u0629 \u0644\u0647\u0630\u0627 \u0627\u0644\u0645\u0633\u062a\u062e\u062f\u0645');
   }
 
   const block = schedule.timeBlocks.id(blockId);
   if (!block) {
-    throw createHttpError(404, 'الفقرة الزمنية غير موجودة');
+    throw createHttpError(404, '\u0627\u0644\u0641\u0642\u0631\u0629 \u0627\u0644\u0632\u0645\u0646\u064a\u0629 \u063a\u064a\u0631 \u0645\u0648\u062c\u0648\u062f\u0629');
   }
 
-  // تغيير النشاط (أو الإبقاء على النشاط الحالي إن لم يتغير)
+  // Resolve the activity for this block (current or changed)
   const activityIdChanged = body.activityId !== undefined;
   const activityId = activityIdChanged ? body.activityId : (block.activityId || null);
   const activity = activityId ? await resolveActivity(userId, activityId) : null;
+
+  // System prayer blocks: only status changes allowed — time and activity are locked
+  if (isSystemPrayerActivity(activity)) {
+    if (body.startTime !== undefined || body.endTime !== undefined || activityIdChanged) {
+      throw createHttpError(400, '\u0623\u0648\u0642\u0627\u062a \u0641\u0642\u0631\u0627\u062a \u0627\u0644\u0635\u0644\u0627\u0629 \u062a\u064f\u062d\u062f\u0651\u062f \u062a\u0644\u0642\u0627\u0626\u064a\u0627\u064b \u0645\u0646 \u0627\u0644\u0646\u0638\u0627\u0645 \u2014 \u0644\u0627 \u064a\u0645\u0643\u0646 \u062a\u0639\u062f\u064a\u0644\u0647\u0627 \u064a\u062f\u0648\u064a\u0627\u064b');
+    }
+    if (body.status !== undefined) block.status = body.status;
+    await schedule.save();
+    return {
+      message: '\u062a\u0645 \u062a\u062d\u062f\u064a\u062b \u0627\u0644\u0641\u0642\u0631\u0629 \u0627\u0644\u0632\u0645\u0646\u064a\u0629 \u0628\u0646\u062c\u0627\u062d',
+      timeBlock: {
+        _id: block._id,
+        activityId: block.activityId || null,
+        title: block.title,
+        startTime: block.startTime,
+        endTime: block.endTime,
+        priority: block.priority || null,
+        status: block.status
+      }
+    };
+  }
 
   const startTime = body.startTime !== undefined ? body.startTime : block.startTime;
   const endTime = body.endTime !== undefined ? body.endTime : block.endTime;
@@ -316,7 +379,6 @@ const updateTimeBlock = async ({ userId, programmeDate, blockId, body }) => {
   assertNotInsideSleep({ ctx, candidate: interval });
   assertNoOverlap({ blocks: otherBlocks, candidate: interval, excludeId: blockId, ctx });
 
-  // العنوان والأولوية مشتقة من النشاط (لا نثق في ما يرسله العميل) — أو من الحقول المسموحة يدوياً
   block.activityId = activity ? activity._id : undefined;
   block.title = activity ? activity.title : (body.title !== undefined ? body.title : block.title);
   block.startTime = startTime;
@@ -327,7 +389,7 @@ const updateTimeBlock = async ({ userId, programmeDate, blockId, body }) => {
   await schedule.save();
 
   return {
-    message: 'تم تحديث الفقرة الزمنية بنجاح',
+    message: '\u062a\u0645 \u062a\u062d\u062f\u064a\u062b \u0627\u0644\u0641\u0642\u0631\u0629 \u0627\u0644\u0632\u0645\u0646\u064a\u0629 \u0628\u0646\u062c\u0627\u062d',
     timeBlock: {
       _id: block._id,
       activityId: block.activityId || null,
