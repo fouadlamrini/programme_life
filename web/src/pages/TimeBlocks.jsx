@@ -33,6 +33,16 @@ const formatDuration = (startTime, endTime) => {
 
 const emptyForm = { activityId: '', title: '', priority: 'MEDIUM', startTime: '', endTime: '', status: 'PENDING' }
 
+const isPrayerActivity = (activity) => {
+  return activity && activity.type === 'PRAYER' && activity.preferredTimeSlot === 'AT_PRAYER_TIME'
+}
+
+const isPrayerBlock = (block, activitiesList) => {
+  if (!block.activityId) return false
+  const activity = activitiesList.find((a) => a._id === block.activityId)
+  return isPrayerActivity(activity)
+}
+
 function TimeBlocks() {
   const navigate = useNavigate()
   const [date, setDate] = useState('')
@@ -287,9 +297,16 @@ function TimeBlocks() {
                   <div>
                     <div className="flex items-center justify-between gap-2">
                       <h3 className="font-semibold text-[#174d3d]">{block.title}</h3>
-                      <span className={`w-fit shrink-0 rounded-full px-3 py-1 text-xs font-semibold ${PRIORITY_COLORS[block.priority] || PRIORITY_COLORS.OTHER}`}>
-                        {PRIORITY_LABELS[block.priority] || block.priority}
-                      </span>
+                      <div className="flex shrink-0 gap-1">
+                        {isPrayerBlock(block, activities) && (
+                          <span className="rounded-full bg-[#e8eef4] px-3 py-1 text-xs font-semibold text-[#3d5a80]">
+                            صلاة
+                          </span>
+                        )}
+                        <span className={`w-fit shrink-0 rounded-full px-3 py-1 text-xs font-semibold ${PRIORITY_COLORS[block.priority] || PRIORITY_COLORS.OTHER}`}>
+                          {PRIORITY_LABELS[block.priority] || block.priority}
+                        </span>
+                      </div>
                     </div>
                     <div className="mt-3 flex flex-wrap items-center gap-2 text-sm text-[#53665b]">
                       <span className="font-semibold text-[#123d32]">
@@ -314,20 +331,24 @@ function TimeBlocks() {
                       </select>
                     </label>
                     <div className="flex gap-2">
-                      <button
-                        className="rounded-lg border border-[#dfd2b7] bg-white px-3 py-1.5 text-sm font-semibold text-[#174d3d] transition hover:bg-[#f7e4b4]"
-                        onClick={() => openEditModal(block)}
-                        type="button"
-                      >
-                        تعديل
-                      </button>
-                      <button
-                        className="rounded-lg bg-[#a44e20] px-3 py-1.5 text-sm font-semibold text-white transition hover:bg-[#c05f27]"
-                        onClick={() => handleDelete(block)}
-                        type="button"
-                      >
-                        حذف
-                      </button>
+                      {!isPrayerBlock(block, activities) && (
+                        <>
+                          <button
+                            className="rounded-lg border border-[#dfd2b7] bg-white px-3 py-1.5 text-sm font-semibold text-[#174d3d] transition hover:bg-[#f7e4b4]"
+                            onClick={() => openEditModal(block)}
+                            type="button"
+                          >
+                            تعديل
+                          </button>
+                          <button
+                            className="rounded-lg bg-[#a44e20] px-3 py-1.5 text-sm font-semibold text-white transition hover:bg-[#c05f27]"
+                            onClick={() => handleDelete(block)}
+                            type="button"
+                          >
+                            حذف
+                          </button>
+                        </>
+                      )}
                     </div>
                   </div>
                 </li>
@@ -365,7 +386,7 @@ function TimeBlocks() {
                     value={modal.activityId}
                   >
                     <option value="">بدون نشاط (فقرة حرة)</option>
-                    {activities.map((activity) => (
+                    {activities.filter((a) => !isPrayerActivity(a)).map((activity) => (
                       <option key={activity._id} value={activity._id}>
                         {activity.title} ({activity.durationMinutes} د)
                       </option>
